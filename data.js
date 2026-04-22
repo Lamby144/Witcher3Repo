@@ -1,142 +1,124 @@
 const GAME_DATA = {
+  route: [
+    {
+      id: "roadmap",
+      name: "Roadmap / Setup",
+      level: "Start",
+      priority: "CRITICAL_START",
+      rules: [
+        "Play on Death March from the beginning (default roadmap).",
+        "Keep multiple manual saves. Make a backup save before big story points."
+      ],
+      quests: [
+        { id: "setup_deathmarch", name: "Set difficulty to Death March and keep it there", type: "meta", missable: false },
+        { id: "setup_saves", name: "Create rotating manual saves (at least 5 slots)", type: "meta", missable: false }
+      ]
+    },
 
-/* =========================
-   🗺️ MAIN PLATINUM ROUTE
-========================= */
+    {
+      id: "white-orchard",
+      name: "White Orchard (Do Everything)",
+      level: "1–4",
+      priority: "CRITICAL_START",
+      rules: [
+        "Do all side content before leaving.",
+        "Buy/earn early Gwent cards and play the tutorial match."
+      ],
+      quests: [
+        { id: "wo_main", name: "Finish White Orchard main quests", type: "main", missable: false },
+        { id: "wo_cleanup", name: "Clear POIs and side quests before leaving", type: "side", missable: true }
+      ]
+    },
 
-route: [
-  {
-    id: "white-orchard",
-    name: "White Orchard (DO EVERYTHING)",
-    level: "1-4",
-    priority: "CRITICAL_START",
-    rules: [
-      "Complete ALL side quests before leaving",
-      "Collect ALL Gwent cards here (MISSABLE)",
-      "Play Scholar Gwent match (mandatory)",
-      "Do NOT leave region early"
-    ],
-    quests: [
-      {
-        id: "wo_gwent_scholar",
-        name: "Play Scholar Gwent Match",
-        type: "gwent",
-        missable: true,
-        completed: false
-      },
-      {
-        id: "wo_beast",
-        name: "The Beast of White Orchard",
-        type: "main",
-        missable: false,
-        completed: false
-      }
-    ]
-  },
+    {
+      id: "velen",
+      name: "Velen (Early Game Core)",
+      level: "4–10",
+      priority: "HIGH",
+      rules: [
+        "Build your Gwent collection early. Buy cards from every inn/merchant you meet.",
+        "Do contracts and side quests to avoid trophy misses later."
+      ],
+      quests: [
+        { id: "velen_baron", name: "Progress Bloody Baron questline", type: "main", missable: false },
+        { id: "velen_contracts", name: "Start working through Witcher contracts (trophy)", type: "contract", missable: false }
+      ]
+    },
 
-  {
-    id: "velen",
-    name: "Velen (Early Game Core)",
-    level: "4-10",
-    priority: "HIGH",
-    rules: [
-      "Do Bloody Baron BEFORE free roaming heavily",
-      "Unlock Claywich merchant ASAP (missable rescue)",
-      "Start full Gwent collection immediately"
-    ],
-    quests: [
-      {
-        id: "velen_baron",
-        name: "Bloody Baron Questline",
-        type: "main",
-        missable: false,
-        completed: false
-      },
-      {
-        id: "velen_claywich",
-        name: "Rescue Claywich Merchant",
-        type: "gwent_unlock",
-        missable: true,
-        completed: false
-      }
-    ]
-  },
+    {
+      id: "novigrad",
+      name: "Novigrad (Missable Zone)",
+      level: "10–16",
+      priority: "CRITICAL",
+      rules: [
+        "⚠ Key missables happen around major Novigrad questlines and side stories.",
+        "Keep a manual backup save before progressing too far."
+      ],
+      quests: [
+        { id: "nov_gwent", name: "Keep clearing Gwent players and tournament chain", type: "gwent", missable: true },
+        { id: "nov_side", name: "Finish major side questlines before pushing late-game story", type: "side", missable: true }
+      ]
+    },
 
-  {
-    id: "novigrad",
-    name: "Novigrad (MISSABLE WARNING ZONE)",
-    level: "10-16",
-    priority: "CRITICAL",
-    rules: [
-      "DO NOT start Isle of Mists yet",
-      "Complete Now or Never BEFORE story lock",
-      "Finish ALL Gwent innkeepers BEFORE progression"
-    ],
-    quests: [
-      {
-        id: "nov_now_or_never",
-        name: "Now or Never",
-        type: "main",
-        missable: true,
-        completed: false
-      },
-      {
-        id: "nov_gwent_city",
-        name: "Big City Players",
-        type: "gwent",
-        missable: true,
-        completed: false
-      }
-    ]
-  },
+    {
+      id: "skellige",
+      name: "Skellige (Midgame Exploration)",
+      level: "16–22",
+      priority: "HIGH",
+      rules: [
+        "Do contracts and side content as you go.",
+        "Prepare for Isle of Mists point-of-no-return."
+      ],
+      quests: [
+        { id: "sk_kingmaker", name: "Complete Skellige ruler subplot (trophy)", type: "side", missable: true },
+        { id: "sk_cleanup", name: "Cleanup: contracts, races, fistfights, Gwent", type: "side", missable: false }
+      ]
+    },
 
-  {
-    id: "skellige",
-    name: "Skellige (Midgame Exploration)",
-    level: "16-22",
-    priority: "HIGH",
-    rules: [
-      "Finish ALL Gwent before Isle of Mists",
-      "Complete Skellige contracts BEFORE main story push"
-    ],
-    quests: [
-      {
-        id: "sk_gwent_chain",
-        name: "Skellige Gwent Chain",
-        type: "gwent",
-        missable: true,
-        completed: false
-      },
-      {
-        id: "sk_explore",
-        name: "Explore Skellige Isles",
-        type: "exploration",
-        missable: false,
-        completed: false
-      }
-    ]
-  },
+    {
+      id: "endgame_setup",
+      name: "Pre–Isle of Mists Checklist (CRITICAL LOCK POINT)",
+      level: "20+",
+      priority: "CRITICAL_FINAL_CHECK",
+      rules: [
+        "⚠ Make a backup save BEFORE Isle of Mists.",
+        "Complete ally recruitment and missable questlines before continuing."
+      ],
+      quests: [
+        { id: "preisle_backup", name: "Make a dedicated backup save now (Isle of Mists lock)", type: "meta", missable: true },
+        { id: "preisle_allies", name: "Finish ally recruitment for Kaer Morhen (Full Crew trophy)", type: "side", missable: true },
+        { id: "preisle_gwent", name: "Double-check Gwent missables & tournament cards", type: "gwent", missable: true }
+      ]
+    },
 
-  {
-    id: "endgame_setup",
-    name: "Endgame Preparation (CRITICAL LOCK POINT)",
-    level: "22+",
-    priority: "CRITICAL_FINAL_CHECK",
-    rules: [
-      "Full Crew must be recruited",
-      "All Gwent cards must be collected",
-      "No romance locks pending decisions"
-    ],
-    quests: [
-      {
-        id: "end_full_crew",
-        name: "Recruit All Allies (Full Crew)",
-        type: "main",
-        missable: true,
-        completed: false
-      }
-    ]
-  }
-]
+    {
+      id: "ngplus_prep",
+      name: "New Game+ Preparation",
+      level: "Endgame",
+      priority: "HIGH",
+      rules: [
+        "NG+ resets map discovery and you lose your Gwent card collection.",
+        "Use this section to prep before starting NG+."
+      ],
+      quests: [
+        { id: "ngp_save", name: "Create a clean ‘Post-ending’ save for NG+ start", type: "meta", missable: false },
+        { id: "ngp_stash", name: "Move preferred gear into stash (sets/weapons)", type: "meta", missable: false },
+        { id: "ngp_note_gwent", name: "Note: NG+ does NOT keep your Gwent collection", type: "meta", missable: false }
+      ]
+    },
 
+    {
+      id: "ngplus",
+      name: "New Game+ (Second Run / Cleanup)",
+      level: "Scaled",
+      priority: "HIGH",
+      rules: [
+        "Use NG+ to mop up anything missed if needed.",
+        "If earning Death March here, keep difficulty fixed for the whole run."
+      ],
+      quests: [
+        { id: "ng_start", name: "Start NG+ from your post-ending save", type: "meta", missable: false }
+      ]
+    }
+  ]
 };
