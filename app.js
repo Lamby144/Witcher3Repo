@@ -1,6 +1,20 @@
 const app = document.getElementById("app");
 
-function renderRegion(regionName, levelText, tasks, regionId) {
+function buildSearchText(task) {
+  const parts = [
+    task.name,
+    task.type,
+    task.regionName,
+    task.meta?.source,
+    task.meta?.details,
+    task.meta?.obtainType,
+    task.meta?.territory,
+    task.meta?.deck
+  ];
+  return parts.filter(Boolean).join(" ").toLowerCase();
+}
+
+function renderRegion(regionName, levelText, tasks) {
   const section = document.createElement("div");
   section.className = "section";
 
@@ -16,7 +30,7 @@ function renderRegion(regionName, levelText, tasks, regionId) {
 
   tasks.forEach(task => {
     const label = document.createElement("label");
-    label.dataset.search = `${task.name} ${(task.meta?.source || "")}`.toLowerCase();
+    label.dataset.search = buildSearchText(task);
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -26,7 +40,7 @@ function renderRegion(regionName, levelText, tasks, regionId) {
       if (checkbox.checked) localStorage.setItem(task.id, "done");
       else localStorage.removeItem(task.id);
 
-      AIRouter.refresh();
+      if (typeof AIRouter !== "undefined") AIRouter.refresh();
     };
 
     const textSpan = document.createElement("span");
@@ -36,11 +50,16 @@ function renderRegion(regionName, levelText, tasks, regionId) {
     label.appendChild(checkbox);
     label.appendChild(textSpan);
 
-    // Optional source line for gwent cards
-    if (task.meta?.source) {
+    // Optional meta line (works for both your gwent.js and loader dataset)
+    const metaText =
+      task.meta?.source ||
+      task.meta?.details ||
+      (task.meta?.obtainType ? `${task.meta.obtainType} – ${task.meta.details || ""}`.trim() : "");
+
+    if (metaText) {
       const meta = document.createElement("div");
       meta.className = "task-meta";
-      meta.innerText = task.meta.source;
+      meta.innerText = metaText;
       label.appendChild(meta);
     }
 
@@ -60,15 +79,15 @@ function renderRegion(regionName, levelText, tasks, regionId) {
 function renderApp() {
   app.innerHTML = "";
 
-  // Main route sections
+  // Main route sections (quests)
   GAME_DATA.route.forEach(region => {
-    renderRegion(region.name, region.level, region.quests, region.id);
+    renderRegion(region.name, region.level, region.quests);
   });
 
-  // Gwent section (optional, but makes your placeholder/search truthful)
+  // Gwent tasks (from RouteEngine: supports GWENT_DATA OR GwentStore)
   const gwentTasks = RouteEngine.getGwentTasks();
   if (gwentTasks.length) {
-    renderRegion("Gwent Cards", "Collection", gwentTasks, "gwent");
+    renderRegion("Gwent Cards", "Collection", gwentTasks);
   }
 }
 
@@ -92,25 +111,26 @@ function hookSearch() {
         if (isMatch) matches++;
       });
 
-      // Show/hide section based on matches
       section.style.display = matches > 0 ? "block" : "none";
-
-      // Auto expand when searching and matches exist
       if (value !== "" && matches > 0) content.style.display = "block";
     });
   });
 }
-renderApp();
-hookSearch();
+
 async function init() {
-  try {
-    await GwentStore.load();
-  } catch (e) {
-    console.warn("Gwent load failed:", e);
+  // If you have a gwent-loader.js that defines GwentStore, load it
+  if (typeof GwentStore !== "undefined" && typeof GwentStore.load === "function") {
+    try {
+      await GwentStore.load();
+    } catch (e) {
+      console.warn("Gwent load failed:", e);
+    }
   }
 
   renderApp();
-  AIRouter.init();
+  hookSearch();
+
+  if (typeof AIRouter !== "undefined") AIRouter.init();
 }
 
 init();
