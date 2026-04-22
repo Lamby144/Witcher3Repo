@@ -100,7 +100,17 @@ function hookSearch() {
     });
   });
 }
-
 renderApp();
 hookSearch();
-AIRouter.init();
+async function init() {
+  try {
+    await GwentStore.load();
+  } catch (e) {
+    console.warn("Gwent load failed:", e);
+  }
+
+  renderApp();
+  AIRouter.init();
+}
+
+init();
