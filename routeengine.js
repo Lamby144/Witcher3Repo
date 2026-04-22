@@ -1,97 +1,82 @@
 const RouteEngine = {
+  // Turn GWENT_DATA into "tasks" so it works with the route engine + UI
+  getGwentTasks() {
+    if (typeof GWENT_DATA === "undefined") return [];
 
-/* =========================
-   🎯 GET ALL TASKS FLATTENED
-========================= */
+    const factions = Object.keys(GWENT_DATA);
+    const cards = factions.flatMap(faction => GWENT_DATA[faction]);
 
-getAllTasks() {
-  return GAME_DATA.route.flatMap(region =>
-    region.quests.map(q => ({
-      ...q,
-      region: region.id,
-      regionName: region.name,
-      priority: this.getPriority(q, region)
-    }))
-  );
-},
+    return cards.map(card => ({
+      id: card.id,
+      name: `🃏 ${card.name}`,
+      type: "gwent",
+      missable: !!card.missable,
+      region: "gwent",
+      regionName: "Gwent Cards",
+      meta: {
+        source: card.source,
+        faction
+      }
+    }));
+  },
 
-/* =========================
-   ⚖️ PRIORITY SYSTEM (CORE AI LOGIC)
-========================= */
+  getAllTasks() {
+    const routeTasks = GAME_DATA.route.flatMap(region =>
+      region.quests.map(q => ({
+        ...q,
+        region: region.id,
+        regionName: region.name,
+        priority: this.getPriority(q, region)
+      }))
+    );
 
-getPriority(task, region) {
-  let score = 0;
+    const gwentTasks = this.getGwentTasks().map(t => ({
+      ...t,
+      priority: 120 + (t.missable ? 200 : 0) // keeps your priority logic
+    }));
 
-  // 🚨 MISSABLE BOOST (VERY IMPORTANT)
-  if (task.missable) score += 200;
+    return [...routeTasks, ...gwentTasks];
+  },
 
-  // 🃏 GWENT PRIORITY
-  if (task.type === "gwent") score += 120;
+  getPriority(task, region) {
+    let score = 0;
 
-  // 🧭 MAIN STORY BALANCE
-  if (task.type === "main") score += 80;
+    if (task.missable) score += 200;
+    if (task.type === "gwent") score += 120;
+    if (task.type === "main") score += 80;
 
-  // ⚠️ REGION RISK ZONES
-  if (region.priority === "CRITICAL") score += 100;
+    if (region.priority === "CRITICAL") score += 100;
+    if (region.priority === "CRITICAL_FINAL_CHECK") score += 150;
 
-  if (region.priority === "CRITICAL_FINAL_CHECK") score += 150;
+    if (region.id === "white-orchard") score += 50;
 
-  // 🧠 EARLY GAME BOOST
-  if (region.id === "white-orchard") score += 50;
+    return score;
+  },
 
-  return score;
-},
+  getNextAction() {
+    const remaining = this.getAllTasks().filter(t => !this.isDone(t.id));
+    remaining.sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
-/* =========================
-   🎯 GET NEXT BEST ACTION
-========================= */
+    return remaining[0] || {
+      name: "🏆 PLATINUM COMPLETE",
+      type: "complete"
+    };
+  },
 
-getNextAction() {
-  const all = this.getAllTasks();
+  isDone(id) {
+    return localStorage.getItem(id) === "done";
+  },
 
-  const remaining = all.filter(t => !this.isDone(t.id));
+  getProgress() {
+    const all = this.getAllTasks();
+    if (!all.length) return 0;
+    const done = all.filter(t => this.isDone(t.id));
+    return Math.round((done.length / all.length) * 100);
+  },
 
-  remaining.forEach(t => {
-    t.score = this.getPriority(t, GAME_DATA.route.find(r => r.id === t.region));
-  });
-
-  remaining.sort((a, b) => b.score - a.score);
-
-  return remaining[0] || {
-    name: "🏆 PLATINUM COMPLETE",
-    type: "complete"
-  };
-},
-
-/* =========================
-   ✔ COMPLETION CHECK
-========================= */
-
-isDone(id) {
-  return localStorage.getItem(id) === "done";
-},
-
-/* =========================
-   📊 PROGRESS CALCULATION
-========================= */
-
-getProgress() {
-  const all = this.getAllTasks();
-  const done = all.filter(t => this.isDone(t.id));
-
-  return Math.round((done.length / all.length) * 100);
-},
-
-/* =========================
-   ⚠️ MISSABLE WARNING SYSTEM
-========================= */
-
-getWarnings(currentRegionId) {
-  const region = GAME_DATA.route.find(r => r.id === currentRegionId);
-
-  if (!region) return [];
-
-  return region.rules || [];
-}
-
+  getWarnings(currentRegionId) {
+    // For GWENT region, no rules unless you add them later
+    const region = GAME_DATA.route.find(r => r.id === currentRegionId);
+    return region?.rules || [];
+  }
 };
