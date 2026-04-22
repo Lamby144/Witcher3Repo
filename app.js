@@ -5,6 +5,7 @@ function buildSearchText(task) {
     task.name,
     task.type,
     task.regionName,
+    task.expansion,
     task.meta?.source,
     task.meta?.details,
     task.meta?.obtainType,
@@ -14,19 +15,17 @@ function buildSearchText(task) {
   return parts.filter(Boolean).join(" ").toLowerCase();
 }
 
-function renderRegion(regionName, levelText, tasks) {
-  const section = document.createElement("div");
-  section.className = "section";
+function groupBy(list, keyFn) {
+  return list.reduce((acc, item) => {
+    const key = keyFn(item);
+    (acc[key] ||= []).push(item);
+    return acc;
+  }, {});
+}
 
-  const header = document.createElement("h2");
-  header.innerText = `${regionName} (${levelText})`;
-
+function renderTaskList(tasks) {
   const content = document.createElement("div");
   content.className = "content";
-
-  header.onclick = () => {
-    content.style.display = content.style.display === "block" ? "none" : "block";
-  };
 
   tasks.forEach(task => {
     const label = document.createElement("label");
@@ -50,7 +49,6 @@ function renderRegion(regionName, levelText, tasks) {
     label.appendChild(checkbox);
     label.appendChild(textSpan);
 
-    // Optional meta line (works for both your gwent.js and loader dataset)
     const metaText =
       task.meta?.source ||
       task.meta?.details ||
@@ -71,27 +69,89 @@ function renderRegion(regionName, levelText, tasks) {
     content.appendChild(label);
   });
 
+  return content;
+}
+
+function renderRegionSection({ title, subtitle, quests = [], gwent = [] }) {
+  const section = document.createElement("div");
+  section.className = "section";
+
+  const header = document.createElement("h2");
+  header.innerText = subtitle ? `${title} (${subtitle})` : title;
+
+  const body = document.createElement("div");
+  body.className = "content";
+  body.style.display = "none";
+
+  header.onclick = () => {
+    body.style.display = body.style.display === "block" ? "none" : "block";
+  };
+
+  // Quests
+  if (quests.length) {
+    const h = document.createElement("h3");
+    h.className = "subheading";
+    h.innerText = "Quests / objectives";
+    body.appendChild(h);
+
+    body.appendChild(renderTaskList(quests));
+  }
+
+  // Gwent for this region
+  if (gwent.length) {
+    const h = document.createElement("h3");
+    h.className = "subheading";
+    h.innerText = "Gwent cards in this region";
+    body.appendChild(h);
+
+    // sort by deck/name to keep it tidy
+    gwent.sort((a, b) => (a.meta?.deck || "").localeCompare(b.meta?.deck || "") || a.name.localeCompare(b.name));
+    body.appendChild(renderTaskList(gwent));
+  }
+
   section.appendChild(header);
-  section.appendChild(content);
+  section.appendChild(body);
   app.appendChild(section);
 }
 
 function renderApp() {
   app.innerHTML = "";
 
-  // Main route sections (quests)
+  const gwentTasks = RouteEngine.getGwentTasks();
+  const gwentByRegion = groupBy(gwentTasks, t => t.region);
+
+  // MAIN GAME REGIONS
   GAME_DATA.route.forEach(region => {
-    renderRegion(region.name, region.level, region.quests);
+    renderRegionSection({
+      title: region.name,
+      subtitle: region.level,
+      quests: region.quests,
+      gwent: gwentByRegion[region.id] || []
+    });
   });
 
-  // Gwent tasks (from RouteEngine: supports GWENT_DATA OR GwentStore)
-  const gwentTasks = RouteEngine.getGwentTasks();
-  if (gwentTasks.length) {
-    renderRegion("Gwent Cards", "Collection", gwentTasks);
+  // DLC SECTION(S)
+  const hos = gwentByRegion["dlc_hos"] || [];
+  const baw = gwentByRegion["dlc_baw"] || [];
+
+  if (hos.length || baw.length) {
+    renderRegionSection({
+      title: "DLC – Hearts of Stone",
+      subtitle: "DLC",
+      quests: [],
+      gwent: hos
+    });
+
+    renderRegionSection({
+      title: "DLC – Blood and Wine",
+      subtitle: "DLC",
+      quests: [],
+      gwent: baw
+    });
   }
 }
 
-// Improved search: hides whole sections with zero matches; expands sections with matches
+// Search: hides whole sections with zero matches; expands sections with matches
 function hookSearch() {
   const searchEl = document.getElementById("search");
   if (!searchEl) return;
@@ -118,7 +178,6 @@ function hookSearch() {
 }
 
 async function init() {
-  // If you have a gwent-loader.js that defines GwentStore, load it
   if (typeof GwentStore !== "undefined" && typeof GwentStore.load === "function") {
     try {
       await GwentStore.load();
@@ -129,7 +188,6 @@ async function init() {
 
   renderApp();
   hookSearch();
-
   if (typeof AIRouter !== "undefined") AIRouter.init();
 }
 
