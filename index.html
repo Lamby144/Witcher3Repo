@@ -1,67 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-<title>Witcher 3 – Platinum AI Route System</title>
-
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Witcher 3 – Platinum AI Route System</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
+  <header>
+    <h1>🐺 Witcher 3 Platinum AI Route</h1>
 
-<header>
-  <h1>🐺 Witcher 3 Platinum AI Route</h1>
+    <div id="dashboard">
+      <h2>🎯 Next Best Action</h2>
+      <div id="nextTask">Loading route...</div>
 
-  <div id="dashboard">
+      <h2>⚠️ Warnings</h2>
+      <div id="warnings"></div>
 
-    <h2>🎯 Next Best Action</h2>
-    <div id="nextTask">Loading route...</div>
-
-    <h2>⚠️ Warnings</h2>
-    <div id="warnings"></div>
-
-    <h2>📊 Completion Progress</h2>
-    <div id="progressBar">
-      <div id="progressFill"></div>
+      <h2>📊 Completion Progress</h2>
+      <div id="progressBar"><div id="progressFill"></div></div>
+      <p id="progressText">0%</p>
     </div>
-    <p id="progressText">0%</p>
+  </header>
 
-  </div>
-</header>
+  <hr/>
 
-<hr/>
+  <section>
+    <input
+      id="search"
+      placeholder="Search quests, Gwent cards, merchants..."
+      autocomplete="off"
+    />
+  </section>
 
-<!-- SEARCH -->
-<section>
-  <input
-    id="search"
-    placeholder="Search quests, Gwent cards, merchants..."
-    autocomplete="off"
-  />
-</section>
+  <hr/>
 
-<hr/>
+  <main id="app"></main>
 
-<!-- MAIN APP -->
-<main id="app"></main>
+  <hr/>
 
-<hr/>
+  <footer>
+    <p>⚡ Platinum route system – safe missable-free walkthrough</p>
+  </footer>
 
-<footer>
-  <p>⚡ Platinum route system – safe missable-free walkthrough</p>
-</footer>
-
-<!-- ===================== -->
-<!-- SCRIPT LOADING ORDER  -->
-<!-- ===================== -->
-
-<script src="data.js"></script>
-<script src="gwent.js"></script>
-<script src="route-engine.js"></script>
-<script src="ai-router.js"></script>
-<script src="app.js"></script>
-
+  <!-- SCRIPT ORDER -->
+  <script src="data.js"></script>
+  <script src="gwent.js"></script>
+  <script src="route-engine.js"></script>
+  <script src="ai-router.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
