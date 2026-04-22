@@ -25,3 +25,11 @@ label input[type="checkbox"]:checked + .task-text {
   color: #9a9a9a;
   padding-top: 2px;
 }
+
+.subheading {
+  margin: 10px 0 6px;
+  font-size: 13px;
+  color: #bdbdbd;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
