@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b0f14" />
+  <title>Witcher 3 – Ultimate Platinum Checklist</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand__title">Witcher 3 – Ultimate Platinum Checklist</div>
+      <div class="brand__sub">All-in-one run tracker + full Gwent card checklist</div>
+    </div>
+
+    <div class="topbar__actions">
+      <button id="btnExport" class="btn btn--ghost" title="Export your save to a file">Export Save</button>
+      <label class="btn btn--ghost fileLabel" title="Import a previously exported save file">
+        Import Save
+        <input id="fileImport" type="file" accept="application/json" />
+      </label>
+      <button id="btnReset" class="btn btn--danger" title="Reset ALL progress">Reset</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="summary card">
+      <div class="summary__left">
+        <h1>Run Summary</h1>
+        <p class="muted">
+          Progress is saved locally in your browser (no logins). Use Export/Import if you want to move devices.
+        </p>
+      </div>
+
+      <div class="summary__right">
+        <div class="kpi">
+          <div class="kpi__label">Overall Progress</div>
+          <div class="kpi__value" id="overallText">0%</div>
+          <div class="progress">
+            <div class="progress__bar" id="overallBar" style="width:0%"></div>
+          </div>
+          <div class="muted small" id="overallCount">0 / 0</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="nav card" id="quickNav">
+      <div class="nav__title">Quick Jump</div>
+      <div class="nav__links" id="navLinks"></div>
+    </section>
+
+    <section id="checklistRoot"></section>
+
+    <section class="card gwent" id="gwentSection">
+      <div class="card__header">
+        <div>
+          <h2>🃏 Gwent – Full Card Checklist</h2>
+          <p class="muted">
+            Loaded from <code>data/cards.json</code>. Includes expansion, deck, territory and how-to-get details. [1](https://gwentcards.github.io/cards.json)[2](https://gwentcards.github.io/)
+          </p>
+        </div>
+      </div>
+
+      <div class="gwent__controls">
+        <input id="gwentSearch" class="input" placeholder="Search cards (name, deck, territory, details)..." />
+        <select id="gwentExpansion" class="input">
+          <option value="">All expansions</option>
+        </select>
+        <select id="gwentDeck" class="input">
+          <option value="">All decks</option>
+        </select>
+        <select id="gwentTerritory" class="input">
+          <option value="">All territories</option>
+        </select>
+
+        <label class="checkboxLine">
+          <input type="checkbox" id="gwentOnlyUnchecked" />
+          <span>Only show unchecked</span>
+        </label>
+      </div>
+
+      <div class="gwent__meta">
+        <div class="muted small" id="gwentCount">Loading cards…</div>
+        <div class="progress">
+          <div class="progress__bar" id="gwentBar" style="width:0%"></div>
+        </div>
+        <div class="muted small" id="gwentProgressText">0 / 0</div>
+      </div>
+
+      <div id="gwentRoot" class="gwent__list"></div>
+    </section>
+
+    <footer class="footer muted small">
+      Tip: On iPhone, open this site in Safari → Share → <strong>Add to Home Screen</strong>.
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    // PWA / offline cache (optional but nice on iPhone)
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));
+    }
+  </script>
+</body>
+</html>
