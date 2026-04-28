@@ -4,16 +4,17 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b0f14" />
-  <title>Witcher 3 – Ultimate Platinum Checklist</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css" />
+  <title>Witcher 3 – Ultimate Platinum Checklist (V2)</title>
+
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body>
   <header class="topbar">
     <div class="brand">
-      <div class="brand__title">Witcher 3 – Ultimate Platinum Checklist</div>
-      <div class="brand__sub">All-in-one run tracker + full Gwent card checklist</div>
+      <div class="brand__title">Witcher 3 – Ultimate Platinum Checklist <span class="muted">(V2)</span></div>
+      <div class="brand__sub">Platinum-safe run tracker • Isle of Mists warnings • Full trophies • Full Gwent checklist</div>
     </div>
 
     <div class="topbar__actions">
@@ -27,22 +28,60 @@
   </header>
 
   <main class="container">
+    <!-- Isle of Mists warning banner (shows only when triggered) -->
+    <section id="iomBanner" class="banner banner--hidden">
+      <div class="banner__icon">⚠️</div>
+      <div class="banner__content">
+        <div class="banner__title">ISLE OF MISTS WARNING – Point of No Return for many side quests</div>
+        <div class="banner__text" id="iomText"></div>
+        <div class="banner__actions">
+          <a class="btn btn--ghost" href="#sec-isle-of-mists">Jump to Isle of Mists Checklist</a>
+          <a class="btn btn--ghost" href="#trophies">Jump to Trophies</a>
+        </div>
+      </div>
+    </section>
+
     <section class="summary card">
       <div class="summary__left">
         <h1>Run Summary</h1>
         <p class="muted">
-          Progress is saved locally in your browser (no logins). Use Export/Import if you want to move devices.
+          Progress saves locally in your browser. Use Export/Import if you swap devices.
         </p>
+
+        <div class="chips">
+          <div class="chip" id="chipDM">Death March: <strong id="dmState">Not locked</strong></div>
+          <div class="chip" id="chipIOM">Isle of Mists: <strong id="iomState">Not started</strong></div>
+          <div class="chip">Platform: <strong>PS5 / Complete Edition friendly</strong></div>
+        </div>
       </div>
 
       <div class="summary__right">
         <div class="kpi">
-          <div class="kpi__label">Overall Progress</div>
-          <div class="kpi__value" id="overallText">0%</div>
-          <div class="progress">
-            <div class="progress__bar" id="overallBar" style="width:0%"></div>
-          </div>
-          <div class="muted small" id="overallCount">0 / 0</div>
+          <div class="kpi__label">Core Checklist Progress</div>
+          <div class="kpi__value" id="corePct">0%</div>
+          <div class="progress"><div class="progress__bar" id="coreBar" style="width:0%"></div></div>
+          <div class="muted small" id="coreCount">0 / 0</div>
+        </div>
+
+        <div class="kpi kpi--tight">
+          <div class="kpi__label">Trophies Progress (Base Game)</div>
+          <div class="kpi__value kpi__value--sm" id="baseTrophyPct">0%</div>
+          <div class="progress"><div class="progress__bar" id="baseTrophyBar" style="width:0%"></div></div>
+          <div class="muted small" id="baseTrophyCount">0 / 0</div>
+        </div>
+
+        <div class="kpi kpi--tight">
+          <div class="kpi__label">Trophies Progress (DLC selected)</div>
+          <div class="kpi__value kpi__value--sm" id="dlcTrophyPct">0%</div>
+          <div class="progress"><div class="progress__bar" id="dlcTrophyBar" style="width:0%"></div></div>
+          <div class="muted small" id="dlcTrophyCount">0 / 0</div>
+        </div>
+
+        <div class="kpi kpi--tight">
+          <div class="kpi__label">Gwent (Base Game – Card Collector tracking)</div>
+          <div class="kpi__value kpi__value--sm" id="ccPct">0%</div>
+          <div class="progress"><div class="progress__bar" id="ccBar" style="width:0%"></div></div>
+          <div class="muted small" id="ccCount">0 / 0</div>
         </div>
       </div>
     </section>
@@ -52,14 +91,46 @@
       <div class="nav__links" id="navLinks"></div>
     </section>
 
+    <!-- MAIN CHECKLIST -->
     <section id="checklistRoot"></section>
 
+    <!-- TROPHIES -->
+    <section class="card" id="trophies">
+      <div class="card__header">
+        <div>
+          <h2>🏆 Trophies (V2)</h2>
+          <p class="muted">
+            Includes Base Game + Hearts of Stone + Blood and Wine trophy lists, plus optional NG+ section. unt-v2/dlc/Hearts-of-Stone)[8](https://www.truetrophies.com/game/The-Witcher-3-Wild-Hunt-v2/dlc/Blood-and-Wine)
+          </p>
+        </div>
+      </div>
+
+      <div class="trophy__controls">
+        <input id="trophySearch" class="input" placeholder="Search trophies..." />
+        <label class="checkboxLine">
+          <input type="checkbox" id="toggleShowDLC" checked />
+          <span>Show DLC trophies</span>
+        </label>
+        <label class="checkboxLine">
+          <input type="checkbox" id="toggleShowNG" />
+          <span>Show NG+ section</span>
+        </label>
+        <label class="checkboxLine">
+          <input type="checkbox" id="toggleOnlyMissable" />
+          <span>Only show missables</span>
+        </label>
+      </div>
+
+      <div id="trophyRoot" class="trophy__list"></div>
+    </section>
+
+    <!-- GWENT FULL CHECKLIST -->
     <section class="card gwent" id="gwentSection">
       <div class="card__header">
         <div>
           <h2>🃏 Gwent – Full Card Checklist</h2>
           <p class="muted">
-            Loaded from <code>data/cards.json</code>. Includes expansion, deck, territory and how-to-get details. [1](https://gwentcards.github.io/cards.json)[2](https://gwentcards.github.io/)
+            Loaded from <code>data/cards.json</code> (expansion/deck/territory/how-to-get). [4](https://gwentcards.github.io/cards.json)[5](https://gwentcards.github.io/)
           </p>
         </div>
       </div>
@@ -84,9 +155,7 @@
 
       <div class="gwent__meta">
         <div class="muted small" id="gwentCount">Loading cards…</div>
-        <div class="progress">
-          <div class="progress__bar" id="gwentBar" style="width:0%"></div>
-        </div>
+        <div class="progress"><div class="progress__bar" id="gwentBar" style="width:0%"></div></div>
         <div class="muted small" id="gwentProgressText">0 / 0</div>
       </div>
 
@@ -94,13 +163,12 @@
     </section>
 
     <footer class="footer muted small">
-      Tip: On iPhone, open this site in Safari → Share → <strong>Add to Home Screen</strong>.
+      Tip: On iPhone, open in Safari → Share → <strong>Add to Home Screen</strong>.
     </footer>
   </main>
 
-  <script src="app.js"></script>
+  <script src="./app.js"></script>
   <script>
-    // PWA / offline cache (optional but nice on iPhone)
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));
     }
